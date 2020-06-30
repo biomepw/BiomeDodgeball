@@ -21,8 +21,9 @@ public class GameManager {
     private final Location[] spectateLocations;
 
     // todo something about this
-    private Location spawnLocation1;
-    private Location spawnLocation2;
+    private final Location spawnLocation1 = new Location(Bukkit.getWorld("world"), -6, 4, -1059);
+    private final Location spawnLocation2 = new Location(Bukkit.getWorld("world"), 9, 4, -1061);
+    private final Location lobbyLocation = new Location(Bukkit.getWorld("world"), 1, 16, -1063);
 
     private final ThreadLocalRandom threadLocalRandom;
 
@@ -32,16 +33,16 @@ public class GameManager {
     private boolean gameRunning;
 
     public GameManager() {
-        spectateLocations = null; // todo something about this
+        spectateLocations = new Location[]{spawnLocation1.clone().add(0, 10, 0), spawnLocation2.clone().add(0, 10, 0)}; // todo something about this
         threadLocalRandom = ThreadLocalRandom.current();
         gameTimer = new Timer();
     }
 
     public void startGame() {
         // If there are no teams, but queued players, make new teams!
-        if (dodgeballTeams.isEmpty() && queuedPlayers.size() >= 6) {
+        if (dodgeballTeams.isEmpty() && queuedPlayers.size() >= 2) { // todo change to 6
             DodgeballTeam red = new DodgeballTeam("Red", spawnLocation1, org.bukkit.ChatColor.RED);
-            DodgeballTeam blue = new DodgeballTeam("Blue", spawnLocation1, org.bukkit.ChatColor.BLUE);
+            DodgeballTeam blue = new DodgeballTeam("Blue", spawnLocation2, org.bukkit.ChatColor.BLUE);
 
             queuedPlayers.forEach(dodgeballPlayer -> {
                 if (red.getTeamMembers().size() <= blue.getTeamMembers().size()) {
@@ -50,6 +51,9 @@ public class GameManager {
                     blue.addMember(dodgeballPlayer);
                 }
             });
+
+            // Clear once processed
+            queuedPlayers.clear();
         }
 
         // Make sure there's only 2 teams!
@@ -66,13 +70,9 @@ public class GameManager {
             // Give the larger team 2 lives, instead of 3
             if (team1size != team2size) {
                 if (team1size > team2size) {
-                    team1.getTeamMembers().forEach(dodgeballPlayer -> {
-                        dodgeballPlayer.setLives(2);
-                    });
+                    team1.getTeamMembers().forEach(dodgeballPlayer -> dodgeballPlayer.setLives(2));
                 } else {
-                    team2.getTeamMembers().forEach(dodgeballPlayer -> {
-                        dodgeballPlayer.setLives(2);
-                    });
+                    team2.getTeamMembers().forEach(dodgeballPlayer -> dodgeballPlayer.setLives(2));
                 }
             }
 
@@ -80,7 +80,6 @@ public class GameManager {
                 dodgeballTeam.teleportMembersToSpawn();
                 dodgeballTeam.getTeamMembers().forEach(dodgeballPlayer -> dodgeballPlayer.setCurrentlyIn(true));
             });
-
 
             Bukkit.broadcastMessage(ChatColor.AQUA + "Dodgeball game is starting! "
                     + team1.getColouredName() + ChatColor.AQUA + " vs " + team2.getColouredName());
@@ -93,8 +92,9 @@ public class GameManager {
     public void checkGameStatus() {
         if (gameRunning) {
             for (DodgeballTeam dodgeballTeam : dodgeballTeams) {
-                if (dodgeballTeam.getTeamMembers().size() == 0) {
+                if (dodgeballTeam.getCurrentlyIn() == 0) {
                     stopGame();
+                    break;
                 }
             }
         }
@@ -110,7 +110,7 @@ public class GameManager {
             DodgeballTeam winningTeam = null;
             for (DodgeballTeam dodgeballTeam : dodgeballTeams) {
                 if (winningTeam != null) {
-                    if (winningTeam.getTeamMembers().size() < dodgeballTeam.getTeamMembers().size()) {
+                    if (winningTeam.getCurrentlyIn() < dodgeballTeam.getCurrentlyIn()) {
                         winningTeam = dodgeballTeam;
                     }
                 } else {
@@ -120,11 +120,18 @@ public class GameManager {
 
             if (winningTeam != null) {
                 Bukkit.broadcastMessage(ChatColor.AQUA + "Dodgeball game is over, with " +
-                        ChatColor.BLUE + winningTeam.getTeamName() + ChatColor.AQUA + " winning the game in " +
+                        winningTeam.getColouredName() + ChatColor.AQUA + " winning the game in " +
                         timeOfGame + " seconds");
 
                 // Restore original inventory
-                dodgeballTeams.forEach(dodgeballTeam -> dodgeballTeam.getTeamMembers().forEach(DodgeballPlayer::restoreInventory));
+                dodgeballTeams.forEach(dodgeballTeam -> dodgeballTeam.getTeamMembers().forEach(dodgeballPlayer -> {
+                    dodgeballPlayer.restoreInventory();
+                    dodgeballPlayer.getPlayerObject().teleportAsync(lobbyLocation);
+                }));
+
+                // Clear resources
+                dodgeballTeams.clear();
+                DodgeballPlayer.getDodgeballPlayers().clear();
             }
         }
     }

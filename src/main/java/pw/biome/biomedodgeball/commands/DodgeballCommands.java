@@ -1,5 +1,6 @@
 package pw.biome.biomedodgeball.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -12,7 +13,6 @@ import pw.biome.biomedodgeball.objects.DodgeballTeam;
 import pw.biome.biomedodgeball.objects.GameManager;
 
 public class DodgeballCommands implements CommandExecutor {
-
 
     //todo tidy
     @Override
@@ -29,22 +29,27 @@ public class DodgeballCommands implements CommandExecutor {
                 dodgeballPlayer = new DodgeballPlayer(player);
             }
 
-            if (args.length > 1) {
+            if (args.length >= 1) {
                 if (args[0].equalsIgnoreCase("join")) {
-                    if (!gameManager.isGameRunning()) {
+                    if (!gameManager.isGameRunning() && dodgeballPlayer.getCurrentTeam() == null
+                            && !gameManager.getQueuedPlayers().contains(dodgeballPlayer)) {
                         if (args.length == 2) {
                             DodgeballTeam dodgeballTeam = DodgeballTeam.getFromName(args[1]);
 
                             if (dodgeballTeam != null) {
                                 dodgeballTeam.addMember(dodgeballPlayer);
+                                player.sendMessage(ChatColor.GREEN + "You have joined the team '" +
+                                        dodgeballTeam.getColouredName() + ChatColor.GREEN + "'!");
                             }
                         } else {
                             gameManager.getQueuedPlayers().add(dodgeballPlayer);
+                            Bukkit.broadcastMessage(ChatColor.GREEN + dodgeballPlayer.getDisplayName() + " has just joined the queue!");
                         }
                     }
                 } else if (args[0].equalsIgnoreCase("leave")) {
-                    if (dodgeballPlayer.getCurrentTeam() != null) {
-                        dodgeballPlayer.getCurrentTeam().removeMember(dodgeballPlayer);
+                    if (!gameManager.isGameRunning()) {
+                        gameManager.getQueuedPlayers().remove(dodgeballPlayer);
+                        Bukkit.broadcastMessage(ChatColor.GREEN + dodgeballPlayer.getDisplayName() + " has just left the queue!");
                     }
                 } else if (args[0].equalsIgnoreCase("create")) {
                     if (player.hasPermission("dodgeball.admin")) {
@@ -67,6 +72,13 @@ public class DodgeballCommands implements CommandExecutor {
                         if (!gameManager.isGameRunning()) {
                             gameManager.startGame();
                             player.sendMessage(ChatColor.GREEN + "Starting game!");
+                        }
+                    }
+                } else if (args[0].equalsIgnoreCase("stop")) {
+                    if (player.hasPermission("dodgeball.admin")) {
+                        if (gameManager.isGameRunning()) {
+                            gameManager.stopGame();
+                            player.sendMessage(ChatColor.GREEN + "Stopping game!");
                         }
                     }
                 }

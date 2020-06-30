@@ -35,7 +35,7 @@ public final class BiomeDodgeball extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
+        getServer().getScheduler().cancelTasks(this);
     }
 
     private void biomeChatHook() {
@@ -59,7 +59,7 @@ public final class BiomeDodgeball extends JavaPlugin {
 
                 player.setPlayerListHeader(ChatColor.BLUE + "Biome");
 
-                if (dodgeballPlayer.getCurrentTeam() != null) {
+                if (dodgeballPlayer != null && dodgeballPlayer.getCurrentTeam() != null) {
                     int score = dodgeballPlayer.getHits();
                     player.setPlayerListName(playerCache.getRank().getPrefix() + player.getDisplayName() + ChatColor.GOLD + " | " + score); //todo something in name to distinguish those who are playing
                 } else {

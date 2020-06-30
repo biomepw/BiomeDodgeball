@@ -8,7 +8,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
@@ -40,9 +39,9 @@ public class DodgeballTeam {
     private final Scoreboard scoreboard = manager.getNewScoreboard();
 
     private Team scoreboardTeam;
-    private Objective stats;
 
-    private int scoreboardTaskId;
+    @Getter
+    private Objective stats;
 
     public DodgeballTeam(String teamName, Location spawnLocation, ChatColor teamColour) {
         this.teamName = teamName;
@@ -80,36 +79,16 @@ public class DodgeballTeam {
 
         stats.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        startScoreboardTask();
-    }
+        teamMembers.forEach(dodgeballPlayer -> scoreboardTeam.addEntry(dodgeballPlayer.getDisplayName()));
 
-    /**
-     * Helper method to start a team-wide scoreboard updating task to be run every second
-     */
-    private void startScoreboardTask() {
-        this.scoreboardTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(BiomeDodgeball.getInstance(), this::displayScoreboard, 20, 20);
+        displayScoreboard();
     }
 
     /**
      * Helper method to display scoreboard to all members async
-     * todo test async safety
      */
     public void displayScoreboard() {
-        Bukkit.getScheduler().runTaskAsynchronously(BiomeDodgeball.getInstance(), () -> {
-            teamMembers.forEach(dodgeballPlayer -> {
-                if (!scoreboardTeam.getEntries().contains(dodgeballPlayer.getDisplayName())) {
-                    scoreboardTeam.addEntry(dodgeballPlayer.getDisplayName());
-
-                    Score lives = stats.getScore(ChatColor.RED + "Lives");
-                    Score hits = stats.getScore(ChatColor.GREEN + "Hits");
-
-                    lives.setScore(dodgeballPlayer.getLives());
-                    hits.setScore(dodgeballPlayer.getHits());
-
-                    dodgeballPlayer.getPlayerObject().setScoreboard(scoreboard);
-                }
-            });
-        });
+        Bukkit.getScheduler().runTaskAsynchronously(BiomeDodgeball.getInstance(), () -> teamMembers.forEach(DodgeballPlayer::displayScoreboard));
     }
 
     public void teleportMembersToSpawn() {
@@ -119,7 +98,7 @@ public class DodgeballTeam {
     }
 
     public void addMember(DodgeballPlayer dodgeballPlayer) {
-        Bukkit.broadcastMessage(dodgeballPlayer.getDisplayName() + " has joined " + teamColour + teamName);
+        Bukkit.broadcastMessage(ChatColor.GOLD + dodgeballPlayer.getDisplayName() + " has joined " + teamColour + teamName);
 
         teamMembers.add(dodgeballPlayer);
 
@@ -127,11 +106,22 @@ public class DodgeballTeam {
     }
 
     public void removeMember(DodgeballPlayer dodgeballPlayer) {
-        Bukkit.broadcastMessage(dodgeballPlayer.getDisplayName() + " has left " + teamColour + teamName);
+        Bukkit.broadcastMessage(ChatColor.GOLD + dodgeballPlayer.getDisplayName() + " has left " + teamColour + teamName);
 
         teamMembers.remove(dodgeballPlayer);
 
+        dodgeballPlayer.restoreInventory();
         dodgeballPlayer.setCurrentTeam(null);
+    }
+
+    public int getCurrentlyIn() {
+        int currentlyIn = 0;
+
+        for (DodgeballPlayer teamMember : getTeamMembers()) {
+            if (teamMember.isCurrentlyIn()) currentlyIn++;
+        }
+
+        return currentlyIn;
     }
 
     public String getColouredName() {

@@ -1,5 +1,6 @@
 package pw.biome.biomedodgeball.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -40,15 +41,16 @@ public class DodgeballListener implements Listener {
                     if (shooterDodgeballPlayer != null && shooterDodgeballPlayer.isCurrentlyIn()) {
                         // If they are same team, do nothing
                         if (shooterDodgeballPlayer.getCurrentTeam() == dodgeballPlayer.getCurrentTeam()) return;
-                        // It was a success, run code for when player is hit by dodgeball
-                        shooterDodgeballPlayer.incrementHits();
 
+                        Bukkit.broadcastMessage(shooterDodgeballPlayer.getCurrentTeam().getTeamColour() +
+                                shooterDodgeballPlayer.getDisplayName() + " just shot " +
+                                dodgeballPlayer.getCurrentTeam().getTeamColour() + dodgeballPlayer.getDisplayName());
+
+                        shooterDodgeballPlayer.incrementHits();
                         dodgeballPlayer.decrementLives();
 
-                        // This will teleport them out
-                        dodgeballPlayer.setCurrentlyIn(false);
-
-                        BiomeDodgeball.getInstance().getGameManager().stopGame();
+                        // Poll the game to see if players are in
+                        BiomeDodgeball.getInstance().getGameManager().checkGameStatus();
                     }
                 }
             }

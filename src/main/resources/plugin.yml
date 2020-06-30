@@ -2,3 +2,9 @@ name: BiomeDodgeball
 version: ${project.version}
 main: pw.biome.biomedodgeball.BiomeDodgeball
 api-version: 1.16
+depend: [BiomeChat]
+commands:
+  dodgeball:
+    usage: /dodgeball
+    aliases: [db]
+    description: dodgeball command
