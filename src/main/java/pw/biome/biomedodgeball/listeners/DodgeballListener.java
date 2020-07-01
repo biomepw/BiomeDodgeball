@@ -12,6 +12,7 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -110,8 +111,8 @@ public class DodgeballListener implements Listener {
     @EventHandler
     public void leave(PlayerQuitEvent event) {
         if (!BiomeDodgeball.getInstance().getGameManager().isGameRunning()) return;
+        
         Player player = event.getPlayer();
-
         DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
 
         if (dodgeballPlayer != null) {
@@ -134,8 +135,8 @@ public class DodgeballListener implements Listener {
     @EventHandler
     public void hungerChangeEvent(FoodLevelChangeEvent event) {
         if (!BiomeDodgeball.getInstance().getGameManager().isGameRunning()) return;
-        Player player = (Player) event.getEntity();
 
+        Player player = (Player) event.getEntity();
         DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
 
         if (dodgeballPlayer != null) {
@@ -148,8 +149,22 @@ public class DodgeballListener implements Listener {
     @EventHandler
     public void blockBreak(BlockBreakEvent event) {
         if (!BiomeDodgeball.getInstance().getGameManager().isGameRunning()) return;
-        Player player = event.getPlayer();
 
+        Player player = event.getPlayer();
+        DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
+
+        if (dodgeballPlayer != null) {
+            if (dodgeballPlayer.isCurrentlyIn() || dodgeballPlayer.getCurrentTeam() != null) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void blockPlace(BlockPlaceEvent event) {
+        if (!BiomeDodgeball.getInstance().getGameManager().isGameRunning()) return;
+
+        Player player = event.getPlayer();
         DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
 
         if (dodgeballPlayer != null) {
