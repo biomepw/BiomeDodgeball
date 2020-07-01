@@ -1,12 +1,12 @@
 package pw.biome.biomedodgeball.objects;
 
+import fr.minuskube.netherboard.Netherboard;
+import fr.minuskube.netherboard.bukkit.BPlayerBoard;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
 import pw.biome.biomedodgeball.BiomeDodgeball;
 
 import java.util.UUID;
@@ -41,12 +41,16 @@ public class DodgeballPlayer {
     @Getter
     private int lives;
 
+    @Getter
+    private final BPlayerBoard playerBoard;
+
     public DodgeballPlayer(Player player) {
         this.uuid = player.getUniqueId();
         this.displayName = player.getDisplayName();
         this.playerObject = player;
         this.contents = player.getInventory().getContents();
         this.lives = 3;
+        this.playerBoard = Netherboard.instance().createBoard(player, ChatColor.GOLD + "» Dodgeball");
 
         dodgeballPlayers.put(uuid, this);
     }
@@ -95,18 +99,15 @@ public class DodgeballPlayer {
     }
 
     public void displayScoreboard() {
-        Objective stats = BiomeDodgeball.getInstance().getGameManager().getStats();
-
-        Score lives = stats.getScore(ChatColor.RED + "Lives");
-        Score hits = stats.getScore(ChatColor.GREEN + "Hits");
-
-        lives.setScore(getLives());
-        hits.setScore(getHits());
-
-        playerObject.setScoreboard(BiomeDodgeball.getInstance().getGameManager().getScoreboard());
+        playerBoard.set(ChatColor.RED + "» Lives", getLives());
+        playerBoard.set(ChatColor.RED + "» Hits:", getHits());
     }
 
     public static DodgeballPlayer getFromUUID(UUID uuid) {
         return dodgeballPlayers.get(uuid);
+    }
+
+    public void removeScoreboard() {
+        playerBoard.delete();
     }
 }

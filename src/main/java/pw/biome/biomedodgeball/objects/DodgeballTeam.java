@@ -6,10 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 import pw.biome.biomedodgeball.BiomeDodgeball;
 
@@ -41,8 +37,6 @@ public class DodgeballTeam {
         this.teamColour = teamColour;
         this.contents = loadInventory();
 
-        loadScoreboard();
-
         BiomeDodgeball.getInstance().getGameManager().getDodgeballTeams().add(this);
     }
 
@@ -57,27 +51,6 @@ public class DodgeballTeam {
         ItemStack snowballs = new ItemStack(Material.SNOWBALL, 10);
 
         return new ItemStack[]{snowballs};
-    }
-
-
-    public void loadScoreboard() {
-        scoreboardTeam = BiomeDodgeball.getInstance().getGameManager().getScoreboard().registerNewTeam(teamName);
-
-        scoreboardTeam.setAllowFriendlyFire(false);
-        scoreboardTeam.setCanSeeFriendlyInvisibles(true);
-        scoreboardTeam.setDisplayName(teamColour + teamName);
-        scoreboardTeam.setColor(teamColour);
-
-        teamMembers.forEach(dodgeballPlayer -> scoreboardTeam.addEntry(dodgeballPlayer.getDisplayName()));
-
-        displayScoreboard();
-    }
-
-    /**
-     * Helper method to display scoreboard to all members async
-     */
-    public void displayScoreboard() {
-        Bukkit.getScheduler().runTaskAsynchronously(BiomeDodgeball.getInstance(), () -> teamMembers.forEach(DodgeballPlayer::displayScoreboard));
     }
 
     public void teleportMembersToSpawn() {

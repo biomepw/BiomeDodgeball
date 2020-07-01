@@ -63,7 +63,7 @@ public class DodgeballListener implements Listener {
 
             // Spawn a snowball where the dodgeball landed
             Location hitLocation = projectile.getLocation();
-            hitLocation.getWorld().dropItemNaturally(hitLocation, new ItemStack(Material.SNOWBALL));
+            hitLocation.getWorld().dropItem(hitLocation, new ItemStack(Material.SNOWBALL));
         }
     }
 

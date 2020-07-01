@@ -5,6 +5,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import pw.biome.biomedodgeball.BiomeDodgeball;
@@ -35,21 +36,12 @@ public class GameManager {
     private final Timer gameTimer;
 
     @Getter
-    private final Scoreboard scoreboard;
-
-    @Getter
-    private final Objective stats;
-
-    @Getter
     private boolean gameRunning;
 
     public GameManager() {
         loadLocations();
         threadLocalRandom = ThreadLocalRandom.current();
         gameTimer = new Timer();
-
-        this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        this.stats = scoreboard.registerNewObjective("Stats", "dummy", org.bukkit.ChatColor.GOLD + "Stats: ");
     }
 
     public void startGame() {
@@ -92,7 +84,10 @@ public class GameManager {
 
             dodgeballTeams.forEach(dodgeballTeam -> {
                 dodgeballTeam.teleportMembersToSpawn();
-                dodgeballTeam.getTeamMembers().forEach(dodgeballPlayer -> dodgeballPlayer.setCurrentlyIn(true));
+                dodgeballTeam.getTeamMembers().forEach(dodgeballPlayer -> {
+                    dodgeballPlayer.setCurrentlyIn(true);
+                    dodgeballPlayer.displayScoreboard();
+                });
             });
 
             Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "Dodgeball game is starting! "
@@ -140,6 +135,7 @@ public class GameManager {
                 // Restore original inventory
                 dodgeballTeams.forEach(dodgeballTeam -> dodgeballTeam.getTeamMembers().forEach(dodgeballPlayer -> {
                     dodgeballPlayer.restoreInventory();
+                    dodgeballPlayer.removeScoreboard();
                     dodgeballPlayer.getPlayerObject().teleportAsync(lobbyLocation);
                 }));
 
