@@ -84,8 +84,8 @@ public class GameManager {
                 dodgeballTeam.getTeamMembers().forEach(dodgeballPlayer -> dodgeballPlayer.setCurrentlyIn(true));
             });
 
-            Bukkit.broadcastMessage(ChatColor.AQUA + "Dodgeball game is starting! "
-                    + team1.getColouredName() + ChatColor.AQUA + " vs " + team2.getColouredName());
+            Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "Dodgeball game is starting! "
+                    + team1.getColouredName() + ChatColor.DARK_AQUA + " vs " + team2.getColouredName());
         }
     }
 
@@ -122,8 +122,8 @@ public class GameManager {
             }
 
             if (winningTeam != null) {
-                Bukkit.broadcastMessage(ChatColor.AQUA + "Dodgeball game is over, with " +
-                        winningTeam.getColouredName() + ChatColor.AQUA + " winning the game in " +
+                Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "Dodgeball game is over, with " +
+                        winningTeam.getColouredName() + ChatColor.DARK_AQUA + " winning the game in " +
                         timeOfGame + " seconds");
 
                 // Restore original inventory

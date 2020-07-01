@@ -39,26 +39,29 @@ public class DodgeballCommands implements CommandExecutor {
 
                                 DodgeballTeam dodgeballTeam = new DodgeballTeam(teamName, spawnLocation, teamColour);
 
-                                player.sendMessage(ChatColor.GREEN + "Team '" + dodgeballTeam.getColouredName() + ChatColor.GREEN + " created");
+                                player.sendMessage(ChatColor.DARK_AQUA + "Team '" + dodgeballTeam.getColouredName() + ChatColor.DARK_AQUA + " created");
                             }
                         } else if (args[0].equalsIgnoreCase("start")) {
                             gameManager.startGame();
-                            player.sendMessage(ChatColor.GREEN + "Starting game!");
+                            player.sendMessage(ChatColor.DARK_AQUA + "Starting game!");
                         } else if (args[0].equalsIgnoreCase("stop")) {
                             gameManager.stopGame();
-                            player.sendMessage(ChatColor.GREEN + "Stopping game!");
+                            player.sendMessage(ChatColor.DARK_AQUA + "Stopping game!");
                         } else if (args[0].equalsIgnoreCase("set")) {
                             if (args.length == 2) {
                                 if (args[1].equalsIgnoreCase("red")) {
                                     gameManager.setRedSpawnLocation(player.getLocation());
+                                    player.sendMessage(ChatColor.DARK_AQUA + "Red team spawn location stored.");
                                 } else if (args[1].equalsIgnoreCase("blue")) {
                                     gameManager.setBlueSpawnLocation(player.getLocation());
+                                    player.sendMessage(ChatColor.DARK_AQUA + "Blue team spawn location stored.");
                                 } else if (args[1].equalsIgnoreCase("lobby")) {
                                     gameManager.setLobbyLocation(player.getLocation());
+                                    player.sendMessage(ChatColor.DARK_AQUA + "Lobby location stored.");
                                 } else if (args[1].equalsIgnoreCase("spectator")) {
                                     gameManager.addSpectatorLocation(player.getLocation());
+                                    player.sendMessage(ChatColor.DARK_AQUA + "Spectator location stored.");
                                 }
-                                player.sendMessage(ChatColor.AQUA + "Location stored.");
                             }
                         }
                     }
@@ -71,17 +74,17 @@ public class DodgeballCommands implements CommandExecutor {
 
                                 if (dodgeballTeam != null) {
                                     dodgeballTeam.addMember(dodgeballPlayer);
-                                    player.sendMessage(ChatColor.GREEN + "You have joined the team '" +
-                                            dodgeballTeam.getColouredName() + ChatColor.GREEN + "'!");
+                                    player.sendMessage(ChatColor.DARK_AQUA + "You have joined the team '" +
+                                            dodgeballTeam.getColouredName() + ChatColor.DARK_AQUA + "'!");
                                 }
                             } else {
                                 gameManager.getQueuedPlayers().add(dodgeballPlayer);
-                                Bukkit.broadcastMessage(ChatColor.GREEN + dodgeballPlayer.getDisplayName() + " has just joined the queue!");
+                                Bukkit.broadcastMessage(ChatColor.GOLD + dodgeballPlayer.getDisplayName() + ChatColor.DARK_AQUA + " has just joined the queue!");
                             }
                         }
-                    } else if (args[0].equalsIgnoreCase("leave")) {
+                    } else if (args[0].equalsIgnoreCase("leave") && gameManager.getQueuedPlayers().contains(dodgeballPlayer)) {
                         gameManager.getQueuedPlayers().remove(dodgeballPlayer);
-                        Bukkit.broadcastMessage(ChatColor.GREEN + dodgeballPlayer.getDisplayName() + " has just left the queue!");
+                        Bukkit.broadcastMessage(ChatColor.GOLD + dodgeballPlayer.getDisplayName() + ChatColor.DARK_AQUA + " has just left the queue!");
                     }
                 }
             }
