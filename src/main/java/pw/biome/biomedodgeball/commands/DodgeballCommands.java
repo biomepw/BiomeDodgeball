@@ -44,9 +44,6 @@ public class DodgeballCommands implements CommandExecutor {
                         } else if (args[0].equalsIgnoreCase("start")) {
                             gameManager.startGame();
                             player.sendMessage(ChatColor.DARK_AQUA + "Starting game!");
-                        } else if (args[0].equalsIgnoreCase("stop")) {
-                            gameManager.stopGame();
-                            player.sendMessage(ChatColor.DARK_AQUA + "Stopping game!");
                         } else if (args[0].equalsIgnoreCase("set")) {
                             if (args.length == 2) {
                                 if (args[1].equalsIgnoreCase("red")) {
@@ -85,6 +82,11 @@ public class DodgeballCommands implements CommandExecutor {
                     } else if (args[0].equalsIgnoreCase("leave") && gameManager.getQueuedPlayers().contains(dodgeballPlayer)) {
                         gameManager.getQueuedPlayers().remove(dodgeballPlayer);
                         Bukkit.broadcastMessage(ChatColor.GOLD + dodgeballPlayer.getDisplayName() + ChatColor.DARK_AQUA + " has just left the queue!");
+                    }
+                } else {
+                    if (args[0].equalsIgnoreCase("stop") && player.hasPermission("dodgeball.admin")) {
+                        gameManager.stopGame();
+                        player.sendMessage(ChatColor.DARK_AQUA + "Stopping game!");
                     }
                 }
             }

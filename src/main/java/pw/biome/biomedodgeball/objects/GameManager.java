@@ -1,11 +1,18 @@
 package pw.biome.biomedodgeball.objects;
 
+import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import pw.biome.biomechat.BiomeChat;
+import pw.biome.biomechat.obj.PlayerCache;
+import pw.biome.biomechat.obj.ScoreboardHook;
 import pw.biome.biomedodgeball.BiomeDodgeball;
+import pw.biome.biomedodgeball.listeners.DodgeballListener;
 import pw.biome.biomedodgeball.utils.LocationUtil;
 import pw.biome.biomedodgeball.utils.Timer;
 
@@ -13,27 +20,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class GameManager {
+public class GameManager implements ScoreboardHook {
 
     @Getter
     private final List<DodgeballTeam> dodgeballTeams = new ArrayList<>();
 
     @Getter
     private final List<DodgeballPlayer> queuedPlayers = new ArrayList<>();
-
+    private final ThreadLocalRandom threadLocalRandom;
+    private final Timer gameTimer;
     @Getter
     private List<Location> spectateLocations;
-
     private Location redSpawnLocation;
     private Location blueSpawnLocation;
     private Location lobbyLocation;
-
-    private final ThreadLocalRandom threadLocalRandom;
-
-    private final Timer gameTimer;
-
     @Getter
     private boolean gameRunning;
+
+    private int scoreboardTaskId;
 
     public GameManager() {
         loadLocations();
@@ -43,7 +47,7 @@ public class GameManager {
 
     public void startGame() {
         // If there are no teams, but queued players, make new teams!
-        if (dodgeballTeams.isEmpty() && queuedPlayers.size() >= 2) { // todo change to 6
+        if (dodgeballTeams.isEmpty() && queuedPlayers.size() >= 6) {
             DodgeballTeam red = new DodgeballTeam("Red", redSpawnLocation, org.bukkit.ChatColor.RED);
             DodgeballTeam blue = new DodgeballTeam("Blue", blueSpawnLocation, org.bukkit.ChatColor.BLUE);
 
@@ -89,20 +93,16 @@ public class GameManager {
 
             Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "Dodgeball game is starting! "
                     + team1.getColouredName() + ChatColor.DARK_AQUA + " vs " + team2.getColouredName());
-        }
-    }
 
-    /**
-     * Method to check the game to ensure there are still players playing!
-     */
-    public void checkGameStatus() {
-        if (gameRunning) {
-            for (DodgeballTeam dodgeballTeam : dodgeballTeams) {
-                if (dodgeballTeam.getCurrentlyIn() == 0) {
-                    stopGame();
-                    break;
-                }
-            }
+            // Stop scoreboard tasks
+            BiomeChat biomeChat = BiomeChat.getPlugin();
+            biomeChat.stopScoreboardTask();
+            biomeChat.getScoreboardHookList().forEach(ScoreboardHook::stopScoreboardTask);
+            biomeChat.registerHook(this);
+
+            // Start our own
+            scoreboardTaskId = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously
+                    (BiomeDodgeball.getInstance(), this::restartScoreboardTask, 20, 20).getTaskId();
         }
     }
 
@@ -139,6 +139,39 @@ public class GameManager {
                 // Clear resources
                 dodgeballTeams.clear();
                 DodgeballPlayer.getDodgeballPlayers().clear();
+
+                // Restart scoreboard update task
+                BiomeChat biomeChat = BiomeChat.getPlugin();
+                biomeChat.unregisterHook(this);
+
+                // Restart scoreboard tasks (if there is any)
+                biomeChat.restartScoreboardTask();
+                biomeChat.getScoreboardHookList().forEach(ScoreboardHook::restartScoreboardTask);
+
+                // Remove old snowballs
+                ImmutableList<Entity> entityImmutableList = ImmutableList.copyOf(lobbyLocation.getWorld().getEntities());
+                entityImmutableList.forEach(entity -> {
+                    if (DodgeballListener.getDroppedItemsEntityIds().contains(entity.getEntityId())) {
+                        lobbyLocation.getWorld().getEntities().remove(entity);
+                    }
+                });
+
+                // Clear resources
+                DodgeballListener.getDroppedItemsEntityIds().clear();
+            }
+        }
+    }
+
+    /**
+     * Method to check the game to ensure there are still players playing!
+     */
+    public void checkGameStatus() {
+        if (gameRunning) {
+            for (DodgeballTeam dodgeballTeam : dodgeballTeams) {
+                if (dodgeballTeam.getCurrentlyIn() == 0) {
+                    stopGame();
+                    break;
+                }
             }
         }
     }
@@ -198,5 +231,36 @@ public class GameManager {
         spectateLocations.forEach(spectateLocation -> serialisedLocationList.add(LocationUtil.fromLocation(spectateLocation)));
 
         BiomeDodgeball.getInstance().getConfig().set("spectator.locations", serialisedLocationList);
+    }
+
+    /**
+     * Helper method to show the stats of players in the scoreboard
+     */
+    @Override
+    public void restartScoreboardTask() {
+        ImmutableList<Player> playerList = ImmutableList.copyOf(Bukkit.getServer().getOnlinePlayers());
+        for (Player player : playerList) {
+            PlayerCache playerCache = PlayerCache.getFromUUID(player.getUniqueId());
+
+            if (playerCache == null) return;
+            DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
+
+            player.setPlayerListHeader(ChatColor.BLUE + "Biome");
+
+            if (dodgeballPlayer != null && dodgeballPlayer.getCurrentTeam() != null) {
+                int lives = dodgeballPlayer.getLives();
+                player.setPlayerListName(dodgeballPlayer.getCurrentTeam().getTeamColour() + player.getDisplayName() + ChatColor.GOLD + " | Lives:" + lives);
+            } else {
+                player.setPlayerListName(playerCache.getRank().getPrefix() + player.getDisplayName());
+            }
+        }
+    }
+
+    @Override
+    public void stopScoreboardTask() {
+        if (scoreboardTaskId != 0) {
+            Bukkit.getScheduler().cancelTask(scoreboardTaskId);
+            scoreboardTaskId = 0;
+        }
     }
 }

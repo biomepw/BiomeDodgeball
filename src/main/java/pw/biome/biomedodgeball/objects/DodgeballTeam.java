@@ -45,8 +45,7 @@ public class DodgeballTeam {
     }
 
     private static ItemStack[] loadInventory() {
-        ItemStack snowballs = new ItemStack(Material.SNOWBALL, 10);
-
+        ItemStack snowballs = new ItemStack(Material.SNOWBALL, 3);
         return new ItemStack[]{snowballs};
     }
 
@@ -67,7 +66,7 @@ public class DodgeballTeam {
 
         teamMembers.remove(dodgeballPlayer);
 
-        dodgeballPlayer.restoreInventory();
+        dodgeballPlayer.setPendingRestore(true);
         dodgeballPlayer.setCurrentTeam(null);
     }
 

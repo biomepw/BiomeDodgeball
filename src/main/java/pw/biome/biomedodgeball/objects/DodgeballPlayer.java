@@ -5,6 +5,7 @@ import fr.minuskube.netherboard.bukkit.BPlayerBoard;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import pw.biome.biomedodgeball.BiomeDodgeball;
@@ -25,29 +26,28 @@ public class DodgeballPlayer {
 
     @Getter
     private final Player playerObject;
-    
+    @Getter
+    private final BPlayerBoard playerBoard;
     private ItemStack[] contents;
-
+    @Getter
+    private Location preJoinLocation;
+    @Getter
+    private boolean pendingRestore;
     @Getter
     @Setter
     private DodgeballTeam currentTeam;
-
     @Getter
     private boolean currentlyIn;
-
     @Getter
     private int hits;
-
     @Getter
     private int lives;
-
-    @Getter
-    private final BPlayerBoard playerBoard;
 
     public DodgeballPlayer(Player player) {
         this.uuid = player.getUniqueId();
         this.displayName = player.getDisplayName();
         this.playerObject = player;
+        this.preJoinLocation = player.getLocation();
         this.contents = null;
         this.lives = 3;
         this.playerBoard = Netherboard.instance().createBoard(player, ChatColor.GOLD + "» Dodgeball");
@@ -55,12 +55,16 @@ public class DodgeballPlayer {
         dodgeballPlayers.put(uuid, this);
     }
 
+    public static DodgeballPlayer getFromUUID(UUID uuid) {
+        return dodgeballPlayers.get(uuid);
+    }
+
     public void setCurrentlyIn(boolean currentlyIn) {
         this.currentlyIn = currentlyIn;
         if (!currentlyIn) {
             BiomeDodgeball.getInstance().getGameManager().teleportOut(this); // this looks gross
         } else {
-            giveDodgeballInventory();
+            prepareForGame();
         }
     }
 
@@ -90,7 +94,7 @@ public class DodgeballPlayer {
         this.lives = lives;
     }
 
-    public void giveDodgeballInventory() {
+    public void prepareForGame() {
         this.contents = playerObject.getInventory().getContents();
         playerObject.getInventory().setContents(currentTeam.getContents());
     }
@@ -104,11 +108,18 @@ public class DodgeballPlayer {
         playerBoard.set(ChatColor.RED + "» Hits:", getHits());
     }
 
-    public static DodgeballPlayer getFromUUID(UUID uuid) {
-        return dodgeballPlayers.get(uuid);
-    }
-
     public void removeScoreboard() {
         playerBoard.delete();
+    }
+
+    public void setPendingRestore(boolean isPendingRestore) {
+        if (isPendingRestore) {
+            if (playerObject.isOnline()) {
+                restoreInventory();
+                playerObject.teleportAsync(preJoinLocation);
+            } else {
+                this.pendingRestore = true;
+            }
+        }
     }
 }
