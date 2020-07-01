@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import pw.biome.biomedodgeball.BiomeDodgeball;
 
@@ -76,12 +77,11 @@ public class DodgeballPlayer {
     }
 
     /**
-     * Do not use this method
-     * It is meant for use of leveling playing field only
+     * Method only meant for use of leveling playing field
+     * use decrementLives
      *
      * @param lives new lives
      */
-    @Deprecated
     public void setLives(int lives) {
         this.lives = lives;
     }
@@ -95,13 +95,15 @@ public class DodgeballPlayer {
     }
 
     public void displayScoreboard() {
-        Score lives = getCurrentTeam().getStats().getScore(ChatColor.RED + "Lives");
-        Score hits = getCurrentTeam().getStats().getScore(ChatColor.GREEN + "Hits");
+        Objective stats = BiomeDodgeball.getInstance().getGameManager().getStats();
+
+        Score lives = stats.getScore(ChatColor.RED + "Lives");
+        Score hits = stats.getScore(ChatColor.GREEN + "Hits");
 
         lives.setScore(getLives());
         hits.setScore(getHits());
 
-        playerObject.setScoreboard(getCurrentTeam().getScoreboard());
+        playerObject.setScoreboard(BiomeDodgeball.getInstance().getGameManager().getScoreboard());
     }
 
     public static DodgeballPlayer getFromUUID(UUID uuid) {

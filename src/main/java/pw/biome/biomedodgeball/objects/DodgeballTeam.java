@@ -33,15 +33,7 @@ public class DodgeballTeam {
     @Getter
     private final ItemStack[] contents;
 
-    private static final ScoreboardManager manager = Bukkit.getScoreboardManager();
-
-    @Getter
-    private static final Scoreboard scoreboard = manager.getNewScoreboard();
-
     private Team scoreboardTeam;
-
-    @Getter
-    private Objective stats;
 
     public DodgeballTeam(String teamName, Location spawnLocation, ChatColor teamColour) {
         this.teamName = teamName;
@@ -69,15 +61,12 @@ public class DodgeballTeam {
 
 
     public void loadScoreboard() {
-        scoreboardTeam = scoreboard.registerNewTeam(teamName);
-        stats = scoreboard.registerNewObjective("Stats", "dummy", teamColour + "Stats: ");
+        scoreboardTeam = BiomeDodgeball.getInstance().getGameManager().getScoreboard().registerNewTeam(teamName);
 
         scoreboardTeam.setAllowFriendlyFire(false);
         scoreboardTeam.setCanSeeFriendlyInvisibles(true);
         scoreboardTeam.setDisplayName(teamColour + teamName);
         scoreboardTeam.setColor(teamColour);
-
-        stats.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         teamMembers.forEach(dodgeballPlayer -> scoreboardTeam.addEntry(dodgeballPlayer.getDisplayName()));
 

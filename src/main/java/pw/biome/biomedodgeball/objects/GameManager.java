@@ -5,6 +5,8 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 import pw.biome.biomedodgeball.BiomeDodgeball;
 import pw.biome.biomedodgeball.utils.LocationUtil;
 import pw.biome.biomedodgeball.utils.Timer;
@@ -33,12 +35,21 @@ public class GameManager {
     private final Timer gameTimer;
 
     @Getter
+    private final Scoreboard scoreboard;
+
+    @Getter
+    private final Objective stats;
+
+    @Getter
     private boolean gameRunning;
 
     public GameManager() {
         loadLocations();
         threadLocalRandom = ThreadLocalRandom.current();
         gameTimer = new Timer();
+
+        this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        this.stats = scoreboard.registerNewObjective("Stats", "dummy", org.bukkit.ChatColor.GOLD + "Stats: ");
     }
 
     public void startGame() {
