@@ -4,6 +4,10 @@ import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.configuration.file.FileConfiguration;
+import pw.biome.biomedodgeball.BiomeDodgeball;
+import pw.biome.biomedodgeball.utils.LocationUtil;
+import pw.biome.biomedodgeball.utils.Timer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +22,11 @@ public class GameManager {
     private final List<DodgeballPlayer> queuedPlayers = new ArrayList<>();
 
     @Getter
-    private final Location[] spectateLocations;
+    private List<Location> spectateLocations;
 
-    // todo something about this
-    private final Location spawnLocation1 = new Location(Bukkit.getWorld("world"), -6, 4, -1059);
-    private final Location spawnLocation2 = new Location(Bukkit.getWorld("world"), 9, 4, -1061);
-    private final Location lobbyLocation = new Location(Bukkit.getWorld("world"), 1, 16, -1063);
+    private Location redSpawnLocation;
+    private Location blueSpawnLocation;
+    private Location lobbyLocation;
 
     private final ThreadLocalRandom threadLocalRandom;
 
@@ -33,7 +36,7 @@ public class GameManager {
     private boolean gameRunning;
 
     public GameManager() {
-        spectateLocations = new Location[]{spawnLocation1.clone().add(0, 10, 0), spawnLocation2.clone().add(0, 10, 0)}; // todo something about this
+        loadLocations();
         threadLocalRandom = ThreadLocalRandom.current();
         gameTimer = new Timer();
     }
@@ -41,8 +44,8 @@ public class GameManager {
     public void startGame() {
         // If there are no teams, but queued players, make new teams!
         if (dodgeballTeams.isEmpty() && queuedPlayers.size() >= 2) { // todo change to 6
-            DodgeballTeam red = new DodgeballTeam("Red", spawnLocation1, org.bukkit.ChatColor.RED);
-            DodgeballTeam blue = new DodgeballTeam("Blue", spawnLocation2, org.bukkit.ChatColor.BLUE);
+            DodgeballTeam red = new DodgeballTeam("Red", redSpawnLocation, org.bukkit.ChatColor.RED);
+            DodgeballTeam blue = new DodgeballTeam("Blue", blueSpawnLocation, org.bukkit.ChatColor.BLUE);
 
             queuedPlayers.forEach(dodgeballPlayer -> {
                 if (red.getTeamMembers().size() <= blue.getTeamMembers().size()) {
@@ -142,7 +145,54 @@ public class GameManager {
      * @param dodgeballPlayer to teleport out
      */
     public void teleportOut(DodgeballPlayer dodgeballPlayer) {
-        int randomInt = threadLocalRandom.nextInt(spectateLocations.length);
-        dodgeballPlayer.getPlayerObject().teleport(spectateLocations[randomInt]);
+        int randomInt = threadLocalRandom.nextInt(spectateLocations.size());
+        dodgeballPlayer.getPlayerObject().teleport(spectateLocations.get(randomInt));
+    }
+
+    private void loadLocations() {
+        FileConfiguration config = BiomeDodgeball.getInstance().getConfig();
+        this.redSpawnLocation = LocationUtil.toLocation(config.getString("red.spawn_location"));
+        this.blueSpawnLocation = LocationUtil.toLocation(config.getString("blue.spawn_location"));
+        this.lobbyLocation = LocationUtil.toLocation(config.getString("lobby.spawn_location"));
+
+        List<Location> locations = new ArrayList<>();
+
+        List<String> locationStrings = config.getStringList("spectator.locations");
+        for (String locationString : locationStrings) {
+            Location location = LocationUtil.toLocation(locationString);
+            locations.add(location);
+        }
+
+        this.spectateLocations = locations;
+    }
+
+    public void setRedSpawnLocation(Location location) {
+        this.redSpawnLocation = location;
+        String serialised = LocationUtil.fromLocation(location);
+        BiomeDodgeball.getInstance().getConfig().set("red.spawn_location", serialised);
+        BiomeDodgeball.getInstance().saveConfig();
+    }
+
+    public void setBlueSpawnLocation(Location location) {
+        this.blueSpawnLocation = location;
+        String serialised = LocationUtil.fromLocation(location);
+        BiomeDodgeball.getInstance().getConfig().set("blue.spawn_location", serialised);
+        BiomeDodgeball.getInstance().saveConfig();
+    }
+
+    public void setLobbyLocation(Location location) {
+        this.lobbyLocation = location;
+        String serialised = LocationUtil.fromLocation(location);
+        BiomeDodgeball.getInstance().getConfig().set("lobby.spawn_location", serialised);
+        BiomeDodgeball.getInstance().saveConfig();
+    }
+
+    public void addSpectatorLocation(Location location) {
+        spectateLocations.add(location);
+
+        List<String> serialisedLocationList = new ArrayList<>();
+        spectateLocations.forEach(spectateLocation -> serialisedLocationList.add(LocationUtil.fromLocation(spectateLocation)));
+
+        BiomeDodgeball.getInstance().getConfig().set("spectator.locations", serialisedLocationList);
     }
 }

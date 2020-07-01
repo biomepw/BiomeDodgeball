@@ -1,4 +1,4 @@
-package pw.biome.biomedodgeball.objects;
+package pw.biome.biomedodgeball.utils;
 
 import lombok.Getter;
 

@@ -3,6 +3,7 @@ package pw.biome.biomedodgeball;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import pw.biome.biomechat.BiomeChat;
@@ -28,6 +29,11 @@ public final class BiomeDodgeball extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DodgeballListener(), this);
         getCommand("dodgeball").setExecutor(new DodgeballCommands());
 
+        // Add config defaults
+        World world = getServer().getWorld("world");
+        getConfig().addDefault("red.spawn_location", world.getSpawnLocation());
+        getConfig().addDefault("blue.spawn_location", world.getSpawnLocation());
+        getConfig().addDefault("lobby.spawn_location", world.getSpawnLocation());
         saveDefaultConfig();
 
         biomeChatHook();
@@ -60,8 +66,8 @@ public final class BiomeDodgeball extends JavaPlugin {
                 player.setPlayerListHeader(ChatColor.BLUE + "Biome");
 
                 if (dodgeballPlayer != null && dodgeballPlayer.getCurrentTeam() != null) {
-                    int score = dodgeballPlayer.getHits();
-                    player.setPlayerListName(playerCache.getRank().getPrefix() + player.getDisplayName() + ChatColor.GOLD + " | " + score); //todo something in name to distinguish those who are playing
+                    int lives = dodgeballPlayer.getLives();
+                    player.setPlayerListName(dodgeballPlayer.getCurrentTeam().getTeamColour() + player.getDisplayName() + ChatColor.GOLD + " | Lives:" + lives);
                 } else {
                     player.setPlayerListName(playerCache.getRank().getPrefix() + player.getDisplayName());
                 }
