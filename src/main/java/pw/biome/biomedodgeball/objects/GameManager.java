@@ -137,6 +137,7 @@ public class GameManager implements ScoreboardHook {
                 }));
 
                 // Clear resources
+                dodgeballTeams.forEach(dodgeballTeam -> dodgeballTeam.getTeamMembers().clear());
                 dodgeballTeams.clear();
                 DodgeballPlayer.getDodgeballPlayers().clear();
 
