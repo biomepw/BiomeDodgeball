@@ -25,8 +25,8 @@ public class DodgeballPlayer {
 
     @Getter
     private final Player playerObject;
-
-    private final ItemStack[] contents;
+    
+    private ItemStack[] contents;
 
     @Getter
     @Setter
@@ -48,7 +48,7 @@ public class DodgeballPlayer {
         this.uuid = player.getUniqueId();
         this.displayName = player.getDisplayName();
         this.playerObject = player;
-        this.contents = player.getInventory().getContents();
+        this.contents = null;
         this.lives = 3;
         this.playerBoard = Netherboard.instance().createBoard(player, ChatColor.GOLD + "» Dodgeball");
 
@@ -91,6 +91,7 @@ public class DodgeballPlayer {
     }
 
     public void giveDodgeballInventory() {
+        this.contents = playerObject.getInventory().getContents();
         playerObject.getInventory().setContents(currentTeam.getContents());
     }
 

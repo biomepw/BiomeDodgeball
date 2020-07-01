@@ -6,7 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scoreboard.Team;
 import pw.biome.biomedodgeball.BiomeDodgeball;
 
 import java.util.ArrayList;
@@ -28,8 +27,6 @@ public class DodgeballTeam {
 
     @Getter
     private final ItemStack[] contents;
-
-    private Team scoreboardTeam;
 
     public DodgeballTeam(String teamName, Location spawnLocation, ChatColor teamColour) {
         this.teamName = teamName;
