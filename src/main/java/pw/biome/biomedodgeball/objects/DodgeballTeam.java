@@ -36,7 +36,7 @@ public class DodgeballTeam {
     private static final ScoreboardManager manager = Bukkit.getScoreboardManager();
 
     @Getter
-    private final Scoreboard scoreboard = manager.getNewScoreboard();
+    private static final Scoreboard scoreboard = manager.getNewScoreboard();
 
     private Team scoreboardTeam;
 
@@ -92,9 +92,7 @@ public class DodgeballTeam {
     }
 
     public void teleportMembersToSpawn() {
-        teamMembers.forEach(dodgeballPlayer -> {
-            dodgeballPlayer.getPlayerObject().teleportAsync(spawnLocation);
-        });
+        teamMembers.forEach(dodgeballPlayer -> dodgeballPlayer.getPlayerObject().teleportAsync(spawnLocation));
     }
 
     public void addMember(DodgeballPlayer dodgeballPlayer) {
