@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -29,7 +30,7 @@ import java.util.List;
 public class DodgeballListener implements Listener {
 
     @Getter
-    private static final List<Integer> droppedItemsEntityIds = new ArrayList<>();
+    private static final List<Entity> droppedItemsEntities = new ArrayList<>();
 
     /**
      * Method to handle when a player is hit by a dodgeball
@@ -77,7 +78,7 @@ public class DodgeballListener implements Listener {
             // Spawn a snowball where the dodgeball landed
             Location hitLocation = projectile.getLocation();
             Item item = hitLocation.getWorld().dropItem(hitLocation, new ItemStack(Material.SNOWBALL));
-            droppedItemsEntityIds.add(item.getEntityId());
+            droppedItemsEntities.add(item);
         }
     }
 
@@ -111,7 +112,7 @@ public class DodgeballListener implements Listener {
     @EventHandler
     public void leave(PlayerQuitEvent event) {
         if (!BiomeDodgeball.getInstance().getGameManager().isGameRunning()) return;
-        
+
         Player player = event.getPlayer();
         DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
 
@@ -141,6 +142,7 @@ public class DodgeballListener implements Listener {
 
         if (dodgeballPlayer != null) {
             if (dodgeballPlayer.isCurrentlyIn() || dodgeballPlayer.getCurrentTeam() != null) {
+                player.setFoodLevel(20);
                 event.setCancelled(true);
             }
         }
@@ -172,5 +174,12 @@ public class DodgeballListener implements Listener {
                 event.setCancelled(true);
             }
         }
+    }
+
+    @EventHandler
+    public void snowballPickup(EntityPickupItemEvent event) {
+        if (!BiomeDodgeball.getInstance().getGameManager().isGameRunning()) return;
+        Item item = event.getItem();
+        droppedItemsEntities.remove(item);
     }
 }

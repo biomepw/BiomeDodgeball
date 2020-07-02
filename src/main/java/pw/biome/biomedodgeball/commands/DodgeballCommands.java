@@ -43,7 +43,6 @@ public class DodgeballCommands implements CommandExecutor {
                             }
                         } else if (args[0].equalsIgnoreCase("start")) {
                             gameManager.startGame();
-                            player.sendMessage(ChatColor.DARK_AQUA + "Starting game!");
                         } else if (args[0].equalsIgnoreCase("set")) {
                             if (args.length == 2) {
                                 if (args[1].equalsIgnoreCase("red")) {

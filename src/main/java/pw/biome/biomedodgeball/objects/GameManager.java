@@ -47,11 +47,12 @@ public class GameManager implements ScoreboardHook {
 
     public void startGame() {
         // If there are no teams, but queued players, make new teams!
-        if (dodgeballTeams.isEmpty() && queuedPlayers.size() >= 6) {
+        if (dodgeballTeams.isEmpty() && queuedPlayers.size() >= 4) {
             DodgeballTeam red = new DodgeballTeam("Red", redSpawnLocation, org.bukkit.ChatColor.RED);
             DodgeballTeam blue = new DodgeballTeam("Blue", blueSpawnLocation, org.bukkit.ChatColor.BLUE);
 
             queuedPlayers.forEach(dodgeballPlayer -> {
+                if (!dodgeballPlayer.getPlayerObject().isOnline()) return;
                 if (red.getTeamMembers().size() <= blue.getTeamMembers().size()) {
                     red.addMember(dodgeballPlayer);
                 } else {
@@ -145,20 +146,14 @@ public class GameManager implements ScoreboardHook {
                 BiomeChat biomeChat = BiomeChat.getPlugin();
                 biomeChat.unregisterHook(this);
 
-                // Restart scoreboard tasks (if there is any)
-                biomeChat.restartScoreboardTask();
+                // Try restart hooks
                 biomeChat.getScoreboardHookList().forEach(ScoreboardHook::restartScoreboardTask);
 
                 // Remove old snowballs
-                ImmutableList<Entity> entityImmutableList = ImmutableList.copyOf(lobbyLocation.getWorld().getEntities());
-                entityImmutableList.forEach(entity -> {
-                    if (DodgeballListener.getDroppedItemsEntityIds().contains(entity.getEntityId())) {
-                        lobbyLocation.getWorld().getEntities().remove(entity);
-                    }
-                });
+                DodgeballListener.getDroppedItemsEntities().forEach(Entity::remove);
 
                 // Clear resources
-                DodgeballListener.getDroppedItemsEntityIds().clear();
+                DodgeballListener.getDroppedItemsEntities().clear();
             }
         }
     }
