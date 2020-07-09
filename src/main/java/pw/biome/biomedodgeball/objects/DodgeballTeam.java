@@ -83,4 +83,18 @@ public class DodgeballTeam {
     public String getColouredName() {
         return teamColour + teamName;
     }
+
+    public DodgeballPlayer getMVP() {
+        DodgeballPlayer mvp = null;
+        for (DodgeballPlayer teamMember : teamMembers) {
+            if (mvp != null) {
+                if (mvp.getHits() < teamMember.getHits()) {
+                    mvp = teamMember;
+                }
+            } else {
+                mvp = teamMember;
+            }
+        }
+        return mvp;
+    }
 }

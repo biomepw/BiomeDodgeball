@@ -130,6 +130,9 @@ public class GameManager implements ScoreboardHook {
                         winningTeam.getColouredName() + ChatColor.DARK_AQUA + " winning the game in " +
                         timeOfGame + " seconds");
 
+                Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "The MVP of the game was: "
+                        + winningTeam.getTeamColour() + winningTeam.getMVP().getDisplayName());
+
                 // Restore original inventory
                 dodgeballTeams.forEach(dodgeballTeam -> dodgeballTeam.getTeamMembers().forEach(dodgeballPlayer -> {
                     dodgeballPlayer.restoreInventory();
