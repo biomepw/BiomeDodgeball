@@ -59,6 +59,9 @@ public class DodgeballCommands implements CommandExecutor {
                                     player.sendMessage(ChatColor.DARK_AQUA + "Spectator location stored.");
                                 }
                             }
+                        } else if (args[0].equalsIgnoreCase("autostart")) {
+                            gameManager.setAutoRun(!gameManager.isAutoRun());
+                            player.sendMessage(ChatColor.DARK_AQUA + "Autorun now: " + gameManager.isAutoRun());
                         }
                     }
 
@@ -78,6 +81,7 @@ public class DodgeballCommands implements CommandExecutor {
                                 Bukkit.broadcastMessage(ChatColor.GOLD + dodgeballPlayer.getDisplayName() + ChatColor.DARK_AQUA + " has just joined the queue!");
                             }
                         }
+                        gameManager.processAutoRun();
                     } else if (args[0].equalsIgnoreCase("leave") && gameManager.getQueuedPlayers().contains(dodgeballPlayer)) {
                         gameManager.getQueuedPlayers().remove(dodgeballPlayer);
                         Bukkit.broadcastMessage(ChatColor.GOLD + dodgeballPlayer.getDisplayName() + ChatColor.DARK_AQUA + " has just left the queue!");

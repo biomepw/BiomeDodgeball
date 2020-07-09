@@ -2,6 +2,7 @@ package pw.biome.biomedodgeball.objects;
 
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
+import lombok.Setter;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -29,13 +30,19 @@ public class GameManager implements ScoreboardHook {
     private final List<DodgeballPlayer> queuedPlayers = new ArrayList<>();
     private final ThreadLocalRandom threadLocalRandom;
     private final Timer gameTimer;
+
     @Getter
     private List<Location> spectateLocations;
     private Location redSpawnLocation;
     private Location blueSpawnLocation;
     private Location lobbyLocation;
+
     @Getter
     private boolean gameRunning;
+
+    @Getter
+    @Setter
+    private boolean autoRun;
 
     private int scoreboardTaskId;
 
@@ -43,6 +50,19 @@ public class GameManager implements ScoreboardHook {
         loadLocations();
         threadLocalRandom = ThreadLocalRandom.current();
         gameTimer = new Timer();
+    }
+
+    public void processAutoRun() {
+        if (autoRun) {
+            if (queuedPlayers.size() >= 4) {
+                Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "Dodgeball game starting in 10 seconds... " +
+                        "Use /dodgeball join to join!");
+                Bukkit.getScheduler().runTaskLater(BiomeDodgeball.getInstance(), this::startGame, 10 * 20);
+            } else {
+                Bukkit.broadcastMessage(ChatColor.DARK_AQUA + "Dodgeball game requires " + (4 - queuedPlayers.size()) +
+                        " players to start... Use /dodgeball join to join!");
+            }
+        }
     }
 
     public void startGame() {
