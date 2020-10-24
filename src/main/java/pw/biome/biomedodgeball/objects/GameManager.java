@@ -1,5 +1,7 @@
 package pw.biome.biomedodgeball.objects;
 
+import co.aikar.commands.BukkitCommandExecutionContext;
+import co.aikar.commands.contexts.ContextResolver;
 import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +20,7 @@ import pw.biome.biomedodgeball.utils.LocationUtil;
 import pw.biome.biomedodgeball.utils.Timer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -27,7 +30,7 @@ public class GameManager implements ScoreboardHook {
     private final List<DodgeballTeam> dodgeballTeams = new ArrayList<>();
 
     @Getter
-    private final List<DodgeballPlayer> queuedPlayers = new ArrayList<>();
+    private final HashSet<DodgeballPlayer> queuedPlayers = new HashSet<>();
     private final ThreadLocalRandom threadLocalRandom;
     private final Timer gameTimer;
 
@@ -50,6 +53,10 @@ public class GameManager implements ScoreboardHook {
         loadLocations();
         threadLocalRandom = ThreadLocalRandom.current();
         gameTimer = new Timer();
+    }
+
+    public static ContextResolver<GameManager, BukkitCommandExecutionContext> getContextResolver() {
+        return (c) -> BiomeDodgeball.getInstance().getGameManager();
     }
 
     public void processAutoRun() {

@@ -1,5 +1,7 @@
 package pw.biome.biomedodgeball.objects;
 
+import co.aikar.commands.BukkitCommandExecutionContext;
+import co.aikar.commands.contexts.ContextResolver;
 import fr.minuskube.netherboard.Netherboard;
 import fr.minuskube.netherboard.bukkit.BPlayerBoard;
 import lombok.Getter;
@@ -26,20 +28,27 @@ public class DodgeballPlayer {
 
     @Getter
     private final Player playerObject;
+
     @Getter
     private final BPlayerBoard playerBoard;
     private ItemStack[] contents;
+
     @Getter
     private Location preJoinLocation;
+
     @Getter
     private boolean pendingRestore;
+
     @Getter
     @Setter
     private DodgeballTeam currentTeam;
+
     @Getter
     private boolean currentlyIn;
+
     @Getter
     private int hits;
+
     @Getter
     private int lives;
 
@@ -57,6 +66,20 @@ public class DodgeballPlayer {
 
     public static DodgeballPlayer getFromUUID(UUID uuid) {
         return dodgeballPlayers.get(uuid);
+    }
+
+
+    public static ContextResolver<DodgeballPlayer, BukkitCommandExecutionContext> getContextResolver() {
+        return (c) -> {
+            Player player = c.getPlayer();
+            DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
+
+            if (dodgeballPlayer == null) {
+                dodgeballPlayer = new DodgeballPlayer(player);
+            }
+
+            return dodgeballPlayer;
+        };
     }
 
     public void setCurrentlyIn(boolean currentlyIn) {

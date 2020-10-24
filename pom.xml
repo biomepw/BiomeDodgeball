@@ -39,6 +39,16 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <relocations>
+                                <relocation>
+                                    <pattern>co.aikar.commands</pattern>
+                                    <shadedPattern>pw.biome.biomedodgeball.acf</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>co.aikar.locales</pattern>
+                                    <shadedPattern>pw.biome.biomedodgeball.locales</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
@@ -60,6 +70,10 @@
         <repository>
             <id>husk</id>
             <url>https://maven.husk.pro/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>aikar</id>
+            <url>https://repo.aikar.co/content/groups/aikar/</url>
         </repository>
     </repositories>
 
@@ -86,6 +100,11 @@
             <groupId>fr.minuskube</groupId>
             <artifactId>netherboard-bukkit</artifactId>
             <version>1.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>co.aikar</groupId>
+            <artifactId>acf-paper</artifactId>
+            <version>0.5.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

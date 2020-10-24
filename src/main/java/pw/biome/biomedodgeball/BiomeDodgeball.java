@@ -1,10 +1,12 @@
 package pw.biome.biomedodgeball;
 
+import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import org.bukkit.World;
 import org.bukkit.plugin.java.JavaPlugin;
 import pw.biome.biomedodgeball.commands.DodgeballCommands;
 import pw.biome.biomedodgeball.listeners.DodgeballListener;
+import pw.biome.biomedodgeball.objects.DodgeballPlayer;
 import pw.biome.biomedodgeball.objects.GameManager;
 
 public final class BiomeDodgeball extends JavaPlugin {
@@ -21,7 +23,11 @@ public final class BiomeDodgeball extends JavaPlugin {
         this.gameManager = new GameManager();
 
         getServer().getPluginManager().registerEvents(new DodgeballListener(), this);
-        getCommand("dodgeball").setExecutor(new DodgeballCommands());
+
+        PaperCommandManager manager = new PaperCommandManager(instance);
+        manager.getCommandContexts().registerContext(DodgeballPlayer.class, DodgeballPlayer.getContextResolver());
+        manager.getCommandContexts().registerContext(GameManager.class, GameManager.getContextResolver());
+        manager.registerCommand(new DodgeballCommands());
 
         // Add config defaults
         World world = getServer().getWorld("world");
