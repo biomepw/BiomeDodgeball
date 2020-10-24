@@ -55,10 +55,6 @@ public class GameManager implements ScoreboardHook {
         gameTimer = new Timer();
     }
 
-    public static ContextResolver<GameManager, BukkitCommandExecutionContext> getContextResolver() {
-        return (c) -> BiomeDodgeball.getInstance().getGameManager();
-    }
-
     public void processAutoRun() {
         if (autoRun) {
             if (queuedPlayers.size() >= 4) {

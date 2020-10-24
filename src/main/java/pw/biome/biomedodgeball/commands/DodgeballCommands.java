@@ -3,6 +3,7 @@ package pw.biome.biomedodgeball.commands;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Dependency;
 import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Subcommand;
 import org.bukkit.Bukkit;
@@ -17,9 +18,12 @@ import pw.biome.biomedodgeball.objects.GameManager;
 @Description("Dodgeball commands")
 public class DodgeballCommands extends BaseCommand {
 
+    @Dependency
+    private GameManager gameManager;
+
     @Subcommand("join")
     @Description("Joins a dodgeball game")
-    public void onDodgeballJoin(DodgeballPlayer dodgeballPlayer, GameManager gameManager, String team) {
+    public void onDodgeballJoin(DodgeballPlayer dodgeballPlayer, String team) {
         if (dodgeballPlayer.getCurrentTeam() == null && !gameManager.getQueuedPlayers().contains(dodgeballPlayer)) {
             if (team != null) {
                 DodgeballTeam dodgeballTeam = DodgeballTeam.getFromName(team);
@@ -39,7 +43,7 @@ public class DodgeballCommands extends BaseCommand {
 
     @Subcommand("leave")
     @Description("Joins a dodgeball game")
-    public void onDodgeballLeave(DodgeballPlayer dodgeballPlayer, GameManager gameManager) {
+    public void onDodgeballLeave(DodgeballPlayer dodgeballPlayer) {
         if (gameManager.getQueuedPlayers().contains(dodgeballPlayer)) {
             gameManager.getQueuedPlayers().remove(dodgeballPlayer);
             Bukkit.broadcastMessage(ChatColor.GOLD + dodgeballPlayer.getDisplayName() + ChatColor.DARK_AQUA + " has just left the queue!");
@@ -51,7 +55,7 @@ public class DodgeballCommands extends BaseCommand {
     @Subcommand("create")
     @CommandPermission("dodgeball.admin")
     @Description("Creates a dodgeball game")
-    public void onDodgeballCreate(Player player, GameManager gameManager, String teamName, String teamColourString) {
+    public void onDodgeballCreate(Player player, String teamName, String teamColourString) {
         if (!gameManager.isGameRunning()) {
             if (teamName != null && teamColourString != null) {
                 ChatColor teamColour = ChatColor.valueOf(teamColourString);
@@ -67,7 +71,7 @@ public class DodgeballCommands extends BaseCommand {
     @Subcommand("start")
     @CommandPermission("dodgeball.admin")
     @Description("Starts dodgeball game")
-    public void onDodgeballStart(Player player, GameManager gameManager) {
+    public void onDodgeballStart(Player player) {
         if (!gameManager.isGameRunning()) {
             gameManager.startGame();
             player.sendMessage(ChatColor.GREEN + "Started dodgeball game!");
@@ -79,7 +83,7 @@ public class DodgeballCommands extends BaseCommand {
     @Subcommand("set")
     @CommandPermission("dodgeball.admin")
     @Description("Adds location to dodgeball team")
-    public void onDodgeballSet(Player player, GameManager gameManager, String teamName) {
+    public void onDodgeballSet(Player player, String teamName) {
         if (teamName.equalsIgnoreCase("red")) {
             gameManager.setRedSpawnLocation(player.getLocation());
             player.sendMessage(ChatColor.DARK_AQUA + "Red team spawn location stored.");
@@ -98,7 +102,7 @@ public class DodgeballCommands extends BaseCommand {
     @Subcommand("autostart")
     @CommandPermission("dodgeball.admin")
     @Description("Toggles autostart of future dodgeball games")
-    public void onDodgeballAutostart(Player player, GameManager gameManager) {
+    public void onDodgeballAutostart(Player player) {
         gameManager.setAutoRun(!gameManager.isAutoRun());
         player.sendMessage(ChatColor.DARK_AQUA + "Autorun now: " + gameManager.isAutoRun());
     }
@@ -106,7 +110,7 @@ public class DodgeballCommands extends BaseCommand {
     @Subcommand("stop")
     @CommandPermission("dodgeball.admin")
     @Description("Stops current dodgeball game")
-    public void onDodgeballStop(Player player, GameManager gameManager) {
+    public void onDodgeballStop(Player player) {
         if (gameManager.isGameRunning()) {
             gameManager.stopGame();
             player.sendMessage(ChatColor.GREEN + "Dodgeball game stopped!");
