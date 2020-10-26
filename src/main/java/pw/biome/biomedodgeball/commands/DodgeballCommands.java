@@ -5,10 +5,12 @@ import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Dependency;
 import co.aikar.commands.annotation.Description;
+import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import pw.biome.biomedodgeball.objects.DodgeballPlayer;
 import pw.biome.biomedodgeball.objects.DodgeballTeam;
@@ -23,7 +25,7 @@ public class DodgeballCommands extends BaseCommand {
 
     @Subcommand("join")
     @Description("Joins a dodgeball game")
-    public void onDodgeballJoin(DodgeballPlayer dodgeballPlayer, String team) {
+    public void onDodgeballJoin(DodgeballPlayer dodgeballPlayer, @Optional String team) {
         if (dodgeballPlayer.getCurrentTeam() == null && !gameManager.getQueuedPlayers().contains(dodgeballPlayer)) {
             if (team != null) {
                 DodgeballTeam dodgeballTeam = DodgeballTeam.getFromName(team);
@@ -54,7 +56,7 @@ public class DodgeballCommands extends BaseCommand {
 
     @Subcommand("create")
     @CommandPermission("dodgeball.admin")
-    @Description("Creates a dodgeball game")
+    @Description("Creates a dodgeball team")
     public void onDodgeballCreate(Player player, String teamName, String teamColourString) {
         if (!gameManager.isGameRunning()) {
             if (teamName != null && teamColourString != null) {
@@ -71,12 +73,12 @@ public class DodgeballCommands extends BaseCommand {
     @Subcommand("start")
     @CommandPermission("dodgeball.admin")
     @Description("Starts dodgeball game")
-    public void onDodgeballStart(Player player) {
+    public void onDodgeballStart(CommandSender sender) {
         if (!gameManager.isGameRunning()) {
             gameManager.startGame();
-            player.sendMessage(ChatColor.GREEN + "Started dodgeball game!");
+            sender.sendMessage(ChatColor.GREEN + "Attempting to start dodgeball game!");
         } else {
-            player.sendMessage(ChatColor.RED + "Game already running!");
+            sender.sendMessage(ChatColor.RED + "Game already running!");
         }
     }
 
@@ -102,20 +104,20 @@ public class DodgeballCommands extends BaseCommand {
     @Subcommand("autostart")
     @CommandPermission("dodgeball.admin")
     @Description("Toggles autostart of future dodgeball games")
-    public void onDodgeballAutostart(Player player) {
+    public void onDodgeballAutostart(CommandSender sender) {
         gameManager.setAutoRun(!gameManager.isAutoRun());
-        player.sendMessage(ChatColor.DARK_AQUA + "Autorun now: " + gameManager.isAutoRun());
+        sender.sendMessage(ChatColor.DARK_AQUA + "Autorun now: " + gameManager.isAutoRun());
     }
 
     @Subcommand("stop")
     @CommandPermission("dodgeball.admin")
     @Description("Stops current dodgeball game")
-    public void onDodgeballStop(Player player) {
+    public void onDodgeballStop(CommandSender sender) {
         if (gameManager.isGameRunning()) {
             gameManager.stopGame();
-            player.sendMessage(ChatColor.GREEN + "Dodgeball game stopped!");
+            sender.sendMessage(ChatColor.GREEN + "Dodgeball game stopped!");
         } else {
-            player.sendMessage(ChatColor.RED + "No game running!");
+            sender.sendMessage(ChatColor.RED + "No game running!");
         }
     }
 }

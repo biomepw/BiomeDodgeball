@@ -25,7 +25,7 @@ public final class BiomeDodgeball extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DodgeballListener(), this);
 
         PaperCommandManager manager = new PaperCommandManager(instance);
-        manager.getCommandContexts().registerContext(DodgeballPlayer.class, DodgeballPlayer.getContextResolver());
+        manager.getCommandContexts().registerIssuerOnlyContext(DodgeballPlayer.class, DodgeballPlayer::getContext);
         manager.registerDependency(GameManager.class, gameManager);
         manager.registerCommand(new DodgeballCommands());
 

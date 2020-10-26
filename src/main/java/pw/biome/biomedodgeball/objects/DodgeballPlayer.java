@@ -2,6 +2,7 @@ package pw.biome.biomedodgeball.objects;
 
 import co.aikar.commands.BukkitCommandExecutionContext;
 import co.aikar.commands.contexts.ContextResolver;
+import co.aikar.commands.contexts.IssuerOnlyContextResolver;
 import fr.minuskube.netherboard.Netherboard;
 import fr.minuskube.netherboard.bukkit.BPlayerBoard;
 import lombok.Getter;
@@ -68,18 +69,15 @@ public class DodgeballPlayer {
         return dodgeballPlayers.get(uuid);
     }
 
+    public static DodgeballPlayer getContext(BukkitCommandExecutionContext c) {
+        Player player = c.getPlayer();
+        DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
 
-    public static ContextResolver<DodgeballPlayer, BukkitCommandExecutionContext> getContextResolver() {
-        return (c) -> {
-            Player player = c.getPlayer();
-            DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
+        if (dodgeballPlayer == null) {
+            dodgeballPlayer = new DodgeballPlayer(player);
+        }
 
-            if (dodgeballPlayer == null) {
-                dodgeballPlayer = new DodgeballPlayer(player);
-            }
-
-            return dodgeballPlayer;
-        };
+        return dodgeballPlayer;
     }
 
     public void setCurrentlyIn(boolean currentlyIn) {
