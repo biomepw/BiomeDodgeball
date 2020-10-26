@@ -1,8 +1,5 @@
 package pw.biome.biomedodgeball.objects;
 
-import co.aikar.commands.BukkitCommandExecutionContext;
-import co.aikar.commands.contexts.ContextResolver;
-import com.google.common.collect.ImmutableList;
 import lombok.Getter;
 import lombok.Setter;
 import net.md_5.bungee.api.ChatColor;
@@ -12,7 +9,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import pw.biome.biomechat.BiomeChat;
-import pw.biome.biomechat.obj.PlayerCache;
+import pw.biome.biomechat.obj.Corp;
 import pw.biome.biomechat.obj.ScoreboardHook;
 import pw.biome.biomedodgeball.BiomeDodgeball;
 import pw.biome.biomedodgeball.listeners.DodgeballListener;
@@ -125,8 +122,7 @@ public class GameManager implements ScoreboardHook {
             biomeChat.registerHook(this);
 
             // Start our own
-            scoreboardTaskId = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously
-                    (BiomeDodgeball.getInstance(), this::restartScoreboardTask, 20, 20).getTaskId();
+            this.restartScoreboardTask();
         }
     }
 
@@ -260,21 +256,24 @@ public class GameManager implements ScoreboardHook {
      */
     @Override
     public void restartScoreboardTask() {
-        ImmutableList<Player> playerList = ImmutableList.copyOf(Bukkit.getServer().getOnlinePlayers());
-        for (Player player : playerList) {
-            PlayerCache playerCache = PlayerCache.getFromUUID(player.getUniqueId());
+        if (scoreboardTaskId == 0) {
+            scoreboardTaskId = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously
+                    (BiomeDodgeball.getInstance(), () -> {
+                        for (Player player : Bukkit.getOnlinePlayers()) {
+                            Corp corp = Corp.getCorpForUser(player.getUniqueId());
 
-            if (playerCache == null) return;
-            DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
+                            DodgeballPlayer dodgeballPlayer = DodgeballPlayer.getFromUUID(player.getUniqueId());
 
-            player.setPlayerListHeader(ChatColor.BLUE + "Biome");
+                            player.setPlayerListHeader(ChatColor.BLUE + "Biome");
 
-            if (dodgeballPlayer != null && dodgeballPlayer.getCurrentTeam() != null) {
-                int lives = dodgeballPlayer.getLives();
-                player.setPlayerListName(dodgeballPlayer.getCurrentTeam().getTeamColour() + player.getDisplayName() + ChatColor.GOLD + " | Lives:" + lives);
-            } else {
-                player.setPlayerListName(playerCache.getRank().getPrefix() + player.getDisplayName());
-            }
+                            if (dodgeballPlayer != null && dodgeballPlayer.getCurrentTeam() != null) {
+                                int lives = dodgeballPlayer.getLives();
+                                player.setPlayerListName(dodgeballPlayer.getCurrentTeam().getTeamColour() + player.getDisplayName() + ChatColor.GOLD + " | Lives:" + lives);
+                            } else {
+                                player.setPlayerListName(corp.getPrefix() + player.getDisplayName());
+                            }
+                        }
+                    }, 20, 20).getTaskId();
         }
     }
 
