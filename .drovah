@@ -2,5 +2,5 @@
 commands = ["mvn clean package"]
 
 [archive]
-files = ["build/libs/BiomeDodgeball-"]
+files = ["target/BiomeDodgeball-"]
 append_buildnumber = true
